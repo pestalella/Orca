@@ -1,6 +1,7 @@
 #pragma once
 #include "algebra.h"
 #include "intersection.h"
+#include "path.h"
 #include "ray.h"
 
 #include <vector>
@@ -14,8 +15,9 @@ namespace Orca
     public:
         virtual Hit intersect(const Ray &r) const = 0;
         virtual Ray generateLightRay(const Vec3f &org) const { return Ray(Vec3f(0), Vec3f(0)); };
-        virtual Vec3f pointOnSurface() const = 0;
+        virtual PathNode pointOnSurface() const = 0;
         virtual Vec3f emission() const { return Vec3f(0); }
+        virtual const BRDF *getBRDF() const { return 0;  }
     };
 
     class Ball : public IntersectableObject
@@ -36,11 +38,12 @@ namespace Orca
 
         Hit intersect(const Ray &r) const override;
         Ray generateLightRay(const Vec3f &org) const override;
-        Vec3f pointOnSurface() const override;
+        PathNode pointOnSurface() const override;
         Vec3f emission() const override
         {
             return emitColor;
         }
+        const BRDF *getBRDF() const override { return brdf; }
 
     };
 
@@ -56,9 +59,12 @@ namespace Orca
             center(center), normal(normal), color(color), brdf(brdf)
         {}
 
-        Vec3f pointOnSurface() const override
-        { return center; }
+        // A plane is not going to be used as an infinite-area light
+        PathNode pointOnSurface() const override
+        { return PathNode(Vec3f(0), Vec3f(0), 0); }
 
         Hit intersect(const Ray &r) const override;
+        const BRDF *getBRDF() const override { return brdf; }
+
     };
 }

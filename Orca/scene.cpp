@@ -1,6 +1,8 @@
 #include "stdafx.h"
 
 #include "BRDF.h"
+#include "path.h"
+#include "random.h"
 #include "scene.h"
 
 using Orca::Hit;
@@ -80,6 +82,31 @@ Orca::Scene::Scene()
     objects.push_back(new Plane(Vec3f(0, 0, 0), Vec3f(0, 0, 1), Vec3f(0.7f, 0.7f, 0.7f), diffuse));
 
     lights.push_back(new Ball(Vec3f(100, -100, 100), 2.0, Vec3f(0, 0, 0), diffuse, Vec3f(10000, 10000, 9000)));
+}
+
+Orca::Path Orca::Scene::buildLightPath(int maxNodes)
+{
+    int selectedLight = (int)(Orca::Random::uniform01()*lights.size());
+    IntersectableObject *light = lights[selectedLight];
+
+    Path lightPath;
+
+    PathNode pathNode = light->pointOnSurface();
+    lightPath.appendNode(pathNode);
+    int numNodes = 1;
+    while (numNodes < maxNodes) {
+        const BRDF *curBRDF = pathNode.brdf;
+        Vec3f newDir = pathNode.brdf->generateOutSample(pathNode.normal, pathNode.normal);
+        Hit hInfo = intersectClosest(Ray(pathNode.pos + 1E-4f*pathNode.normal, newDir));
+        if (hInfo.miss) {
+            // Missed the scene. Stop trying to find new nodes.
+            break;
+        }
+        pathNode = PathNode(hInfo.pos+1E-3f*hInfo.normal, hInfo.normal, hInfo.brdf);
+        lightPath.appendNode(pathNode);
+        numNodes++;
+    }
+    return lightPath;
 }
 
 Vec3f Orca::Scene::traceRayRecursive(Ray const &r, int level)

@@ -68,8 +68,8 @@ Ray Orca::Ball::generateLightRay(const Vec3f &org) const
     float rho = sqrt(Random::uniform01());
     rho *= radius;
     float theta = Random::uniform01()*(float)M_2_PI;
-    float x = rho * cos(theta);
-    float y = rho * sin(theta);
+    float x = rho*cos(theta);
+    float y = rho*sin(theta);
     Vec3f o2c = center - org;
     o2c.normalize();
     Vec3f up(0, 0, 1);
@@ -80,13 +80,27 @@ Ray Orca::Ball::generateLightRay(const Vec3f &org) const
         discUp = o2c.crossProduct(Vec3f(1, 0, 0));
     discUp.normalize();
     Vec3f discRight = discUp.crossProduct(o2c);
-    Vec3f rayDir = center + discRight * x + discUp * y - org;
+    Vec3f rayDir = center + discRight*x + discUp*y - org;
     rayDir.normalize();
     return Ray(org, rayDir);
 }
 
-Vec3f Orca::Ball::pointOnSurface() const
+Orca::PathNode Orca::Ball::pointOnSurface() const
 {
+    float x1, x2;
+    do {
+        x1 = Random::uniform(-1, 1);
+        x2 = Random::uniform(-1, 1);
+    } while ((x1*x1 + x2*x2) >= 1.0f);
+    float x1sq = x1*x1;
+    float x2sq = x2*x2;
+    float sqrtDisc = sqrt(1 - x1sq - x2sq);
 
-    return Vec3f();
+    Vec3f pos(2.0f*x1*sqrtDisc,
+        2.0f*x2*sqrtDisc,
+        1 - 2*(x1sq+x2sq));
+    Vec3f normal(pos-center);
+    normal.normalize();
+
+    return PathNode(pos, normal, brdf);
 }
