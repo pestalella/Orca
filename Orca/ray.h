@@ -1,13 +1,20 @@
 #pragma once
 #include "algebra.h"
 
-class Ray
+namespace Orca
 {
-public:
-    Vec3f origin;
-    Vec3f dirNorm;
+    class Ray
+    {
+    public:
+        Vec3f origin;
+        Vec3f dirNorm;
 
-    Ray(Vec3f org, Vec3f dir) :
-        origin(org), dirNorm(dir)
-    {}
-};
+        Ray(const Vec3f &org, const Vec3f &dir) :
+            origin(org), dirNorm(dir)
+        {}
+        friend std::ostream& operator << (std::ostream &s, const Ray &r)
+        {
+            return s << "(org:" << r.origin << ", dir:" << r.dirNorm << ")";
+        }
+    };
+}

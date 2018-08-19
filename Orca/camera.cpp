@@ -3,9 +3,13 @@
 #include <cmath>
 
 #include "camera.h"
+#include "random.h"
 
-Camera::Camera(Vec3f org, Vec3f lookat, float fov, int width, int height) :
-    origin(org), up(0, 0, 1), viewDir(lookat - org), fov(fov),
+using Orca::Ray;
+using Orca::Vec3f;
+
+Orca::Camera::Camera(Vec3f const & org, Vec3f const & lookat, Vec3f const & requestedUp, float fov, int width, int height) :
+    origin(org), up(requestedUp), viewDir(lookat - org), fov(fov),
     widthPixels(width), heightPixels(height)
 {
     viewDir.normalize();
@@ -24,12 +28,12 @@ Camera::Camera(Vec3f org, Vec3f lookat, float fov, int width, int height) :
     std::cout << "0," << height << ":" << createRay(0, height).dirNorm << std::endl;
 }
 
-Ray Camera::createRay(int i, int j)
+Ray Orca::Camera::createRay(int i, int j)
 {
-    float scale = tan(M_PI*(fov * 0.5) / 180.0);
+    float scale = (float)tan(M_PI*(fov * 0.5) / 180.0);
     float imageAspectRatio = widthPixels / (float)heightPixels;
-    float x = (2.0*(i + 0.5) / (float)widthPixels - 1)*imageAspectRatio*scale;
-    float y = (1.0 - 2.0*(j + 0.5) / (float)heightPixels)*scale;
+    float x = (2.0f*(i + Random::uniform01()) / (float)widthPixels - 1)*imageAspectRatio*scale;
+    float y = (1.0f - 2.0f*(j + Random::uniform01()) / (float)heightPixels)*scale;
     Vec3f dir;
     cameraToWorld.multDirMatrix(Vec3f(x, y, -1), dir);
     dir.normalize();
