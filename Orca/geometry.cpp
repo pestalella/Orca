@@ -102,5 +102,6 @@ Orca::PathNode Orca::Ball::pointOnSurface() const
     Vec3f normal(pos-center);
     normal.normalize();
 
-    return PathNode(pos, normal, brdf);
+    // TODO: Review the outDir (make it cos-weighted diffuse?)
+    return PathNode(pos, normal, normal, 1.0, 0);
 }

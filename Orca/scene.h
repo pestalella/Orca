@@ -13,6 +13,9 @@ namespace Orca
         std::vector<IntersectableObject *> objects;
         std::vector<IntersectableObject *> lights;
 
+    private:
+        Path buildPath(PathNode const &startNode, int maxNodes);
+
     public:
         Scene();
         Hit intersectClosest(const Ray &r);
@@ -20,6 +23,8 @@ namespace Orca
 
         Vec3f directIllumination(Vec3f const &p, Vec3f const & n);
         Orca::Path buildLightPath(int maxNodes);
+        Orca::Path buildCameraPath(Ray const &camRay, int maxNodes);
+
 
         Vec3f traceRayRecursive(Ray const &r, int level);
 

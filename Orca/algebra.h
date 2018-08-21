@@ -152,6 +152,14 @@ namespace Orca
 
             return *this;
         }
+        Vec3 normalized()
+        {
+            T n = norm();
+            if (n > 0) {
+                return *this * (1 / sqrt(n));
+            }
+            return *this;
+        }
 
         friend Vec3 operator * (const T &r, const Vec3 &v)
         {

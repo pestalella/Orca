@@ -61,7 +61,9 @@ namespace Orca
 
         // A plane is not going to be used as an infinite-area light
         PathNode pointOnSurface() const override
-        { return PathNode(Vec3f(0), Vec3f(0), 0); }
+        {
+            return PathNode(Vec3f(0), Vec3f(0), Vec3f(0), 0, 0);
+        }
 
         Hit intersect(const Ray &r) const override;
         const BRDF *getBRDF() const override { return brdf; }

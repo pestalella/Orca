@@ -10,10 +10,12 @@ namespace Orca {
     public:
         Vec3f pos;
         Vec3f normal;
+        Vec3f outDir;
+        float probability;
         BRDF const *brdf;
 
     public:
-        PathNode(Vec3f const &pos, Vec3f const &normal, BRDF const *brdf);
+        PathNode(Vec3f const &pos, Vec3f const &normal, const Vec3f & outDir, float probability, BRDF const *brdf);
         ~PathNode();
     };
 

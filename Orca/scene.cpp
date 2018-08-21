@@ -84,29 +84,40 @@ Orca::Scene::Scene()
     lights.push_back(new Ball(Vec3f(100, -100, 100), 2.0, Vec3f(0, 0, 0), diffuse, Vec3f(10000, 10000, 9000)));
 }
 
-Orca::Path Orca::Scene::buildLightPath(int maxNodes)
+Orca::Path Orca::Scene::buildPath(PathNode const &startNode, int maxNodes)
 {
-    int selectedLight = (int)(Orca::Random::uniform01()*lights.size());
-    IntersectableObject *light = lights[selectedLight];
+    Path randomPath;
 
-    Path lightPath;
-
-    PathNode pathNode = light->pointOnSurface();
-    lightPath.appendNode(pathNode);
+    randomPath.appendNode(startNode);
+    PathNode curNode = startNode;
     int numNodes = 1;
     while (numNodes < maxNodes) {
-        const BRDF *curBRDF = pathNode.brdf;
-        Vec3f newDir = pathNode.brdf->generateOutSample(pathNode.normal, pathNode.normal);
-        Hit hInfo = intersectClosest(Ray(pathNode.pos + 1E-4f*pathNode.normal, newDir));
+        Hit hInfo = intersectClosest(Ray(curNode.pos + 1E-4f*curNode.normal, curNode.outDir));
         if (hInfo.miss) {
             // Missed the scene. Stop trying to find new nodes.
             break;
         }
-        pathNode = PathNode(hInfo.pos+1E-3f*hInfo.normal, hInfo.normal, hInfo.brdf);
-        lightPath.appendNode(pathNode);
+        Orca::BRDFSample outSample = hInfo.brdf->generateOutSample(hInfo.normal, curNode.outDir);
+        curNode = PathNode(hInfo.pos, hInfo.normal, outSample.dir, outSample.probability, hInfo.brdf);
+        randomPath.appendNode(curNode);
         numNodes++;
     }
+    return randomPath;
+
+}
+
+Orca::Path Orca::Scene::buildLightPath(int maxNodes)
+{
+    int selectedLight = (int)(Orca::Random::uniform01()*lights.size());
+    IntersectableObject *light = lights[selectedLight];
+    Path lightPath = buildPath(light->pointOnSurface(), maxNodes);
     return lightPath;
+}
+
+Orca::Path Orca::Scene::buildCameraPath(Ray const &camRay, int maxNodes)
+{
+    PathNode cameraNode(camRay.origin, camRay.dirNorm, camRay.dirNorm, 1.0, 0);
+    return buildPath(cameraNode, maxNodes);
 }
 
 Vec3f Orca::Scene::traceRayRecursive(Ray const &r, int level)
@@ -121,9 +132,10 @@ Vec3f Orca::Scene::traceRayRecursive(Ray const &r, int level)
         Vec3f incomingLight(0);
         if (level > 0) {
             const BRDF *hitbrdf = hInfo.brdf;
-            int ns = 10;
+            int ns = 1;
             for (int i = 0; i < ns; ++i) {
-                Ray recRay(hInfo.pos + 1E-3f*hInfo.normal, hitbrdf->generateOutSample(hInfo.normal, r.dirNorm));
+                BRDFSample outSample = hitbrdf->generateOutSample(hInfo.normal, r.dirNorm);
+                Ray recRay(hInfo.pos + 1E-3f*hInfo.normal, outSample.dir);
                 incomingLight += hInfo.color*traceRayRecursive(recRay, level - 1);
             }
             incomingLight *= 1.0f / ns;
