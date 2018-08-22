@@ -15,7 +15,7 @@ namespace Orca
     public:
         virtual Hit intersect(const Ray &r) const = 0;
         virtual Ray generateLightRay(const Vec3f &org) const { return Ray(Vec3f(0), Vec3f(0)); };
-        virtual PathNode pointOnSurface() const = 0;
+        virtual PathVertex pointOnSurface() const = 0;
         virtual Vec3f emission() const { return Vec3f(0); }
         virtual const BRDF *getBRDF() const { return 0;  }
     };
@@ -38,7 +38,7 @@ namespace Orca
 
         Hit intersect(const Ray &r) const override;
         Ray generateLightRay(const Vec3f &org) const override;
-        PathNode pointOnSurface() const override;
+        PathVertex pointOnSurface() const override;
         Vec3f emission() const override
         {
             return emitColor;
@@ -60,9 +60,9 @@ namespace Orca
         {}
 
         // A plane is not going to be used as an infinite-area light
-        PathNode pointOnSurface() const override
+        PathVertex pointOnSurface() const override
         {
-            return PathNode(Vec3f(0), Vec3f(0), Vec3f(0), 0, 0);
+            return PathVertex(Vec3f(0), Vec3f(0), Vec3f(0), Vec3f(0), 0, 0);
         }
 
         Hit intersect(const Ray &r) const override;

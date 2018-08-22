@@ -85,7 +85,7 @@ Ray Orca::Ball::generateLightRay(const Vec3f &org) const
     return Ray(org, rayDir);
 }
 
-Orca::PathNode Orca::Ball::pointOnSurface() const
+Orca::PathVertex Orca::Ball::pointOnSurface() const
 {
     float x1, x2;
     do {
@@ -103,5 +103,5 @@ Orca::PathNode Orca::Ball::pointOnSurface() const
     normal.normalize();
 
     // TODO: Review the outDir (make it cos-weighted diffuse?)
-    return PathNode(pos, normal, normal, 1.0, 0);
+    return PathVertex(pos, normal, normal, normal, 1.0, brdf);
 }

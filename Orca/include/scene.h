@@ -5,6 +5,8 @@
 
 #include <vector>
 
+class BRDF;
+
 namespace Orca
 {
     class Scene
@@ -12,9 +14,10 @@ namespace Orca
     private:
         std::vector<IntersectableObject *> objects;
         std::vector<IntersectableObject *> lights;
+        BRDF *cameraDF;
 
     private:
-        Path buildPath(PathNode const &startNode, int maxNodes);
+        Path buildPath(PathVertex const &startNode, int maxNodes);
 
     public:
         Scene();
@@ -24,6 +27,8 @@ namespace Orca
         Vec3f directIllumination(Vec3f const &p, Vec3f const & n);
         Orca::Path buildLightPath(int maxNodes);
         Orca::Path buildCameraPath(Ray const &camRay, int maxNodes);
+
+        Vec3f traceRayBidirectional(Ray const & r, int maxVertices);
 
 
         Vec3f traceRayRecursive(Ray const &r, int level);
