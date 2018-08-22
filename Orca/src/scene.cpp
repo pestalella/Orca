@@ -106,7 +106,7 @@ namespace Orca {
 
     Path Scene::buildLightPath(int maxVertices)
     {
-        int selectedLight = (int)(Random::uniform01()*lights.size());
+        int selectedLight = Random::uniformInt(0, lights.size()-1);
         IntersectableObject *light = lights[selectedLight];
         Path lightPath = buildPath(light->pointOnSurface(), maxVertices);
         lightPath.originalLightIntensity = light->emission();

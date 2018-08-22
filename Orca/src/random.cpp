@@ -15,3 +15,9 @@ float Orca::Random::uniform(float minval, float maxval)
     std::uniform_real_distribution<float> uniformDist(minval, maxval);
     return uniformDist(generator);
 }
+
+int Orca::Random::uniformInt(int minval, int maxval)
+{
+    std::uniform_int_distribution<int> uniformDist(minval, maxval);
+    return uniformDist(generator);
+}
