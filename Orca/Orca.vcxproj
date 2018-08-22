@@ -106,7 +106,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Program Files\DevIL Windows SDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Pau\prog\Orca\Orca\include;C:\Program Files\DevIL Windows SDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -143,7 +143,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Program Files\DevIL Windows SDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Pau\prog\Orca\Orca\include;C:\Program Files\DevIL Windows SDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -155,38 +155,36 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="algebra.h" />
-    <ClInclude Include="BRDF.h" />
-    <ClInclude Include="camera.h" />
-    <ClInclude Include="geometry.h" />
-    <ClInclude Include="path.h" />
-    <ClInclude Include="random.h" />
-    <ClInclude Include="image_handling.h" />
-    <ClInclude Include="intersection.h" />
-    <ClInclude Include="ray.h" />
-    <ClInclude Include="scene.h" />
-    <ClInclude Include="stdafx.h" />
-    <ClInclude Include="targetver.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="algebra.cpp" />
-    <ClCompile Include="BRDF.cpp" />
-    <ClCompile Include="camera.cpp" />
-    <ClCompile Include="geometry.cpp" />
-    <ClCompile Include="path.cpp" />
-    <ClCompile Include="random.cpp" />
-    <ClCompile Include="image_handling.cpp" />
-    <ClCompile Include="Orca.cpp" />
-    <ClCompile Include="scene.cpp" />
-    <ClCompile Include="stdafx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-    </ClCompile>
+    <ClInclude Include="include\algebra.h" />
+    <ClInclude Include="include\BRDF.h" />
+    <ClInclude Include="include\camera.h" />
+    <ClInclude Include="include\geometry.h" />
+    <ClInclude Include="include\image_handling.h" />
+    <ClInclude Include="include\intersection.h" />
+    <ClInclude Include="include\path.h" />
+    <ClInclude Include="include\random.h" />
+    <ClInclude Include="include\ray.h" />
+    <ClInclude Include="include\scene.h" />
+    <ClInclude Include="include\stdafx.h" />
+    <ClInclude Include="include\targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\algebra.cpp" />
+    <ClCompile Include="src\BRDF.cpp" />
+    <ClCompile Include="src\camera.cpp" />
+    <ClCompile Include="src\geometry.cpp" />
+    <ClCompile Include="src\image_handling.cpp" />
+    <ClCompile Include="src\Orca.cpp" />
+    <ClCompile Include="src\path.cpp" />
+    <ClCompile Include="src\random.cpp" />
+    <ClCompile Include="src\scene.cpp" />
+    <ClCompile Include="src\stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
