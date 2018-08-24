@@ -9,6 +9,7 @@
 namespace Orca
 {
     class BRDF;
+    class EDF;
 
     class IntersectableObject
     {
@@ -16,8 +17,8 @@ namespace Orca
         virtual Hit intersect(const Ray &r) const = 0;
         virtual Ray generateLightRay(const Vec3f &org) const { return Ray(Vec3f(0), Vec3f(0)); };
         virtual PathVertex pointOnSurface() const = 0;
-        virtual Vec3f emission() const { return Vec3f(0); }
-        virtual const BRDF *getBRDF() const { return 0;  }
+        virtual const BRDF *getBRDF() const { return 0; }
+        virtual const EDF *getEDF() const { return 0; }
     };
 
     class Ball : public IntersectableObject
@@ -26,23 +27,19 @@ namespace Orca
         Vec3f center;
         float radius;
         float radius2;
-        Vec3f color;
-        Vec3f emitColor;
         const BRDF *brdf;
+        const EDF *edf;
 
     public:
-        Ball(Vec3f const &org, float radius, Vec3f const &color, const BRDF *brdf, Vec3f const &emitColor) :
+        Ball(Vec3f const &org, float radius, const BRDF *brdf, const EDF *edf) :
             center(org), radius(radius), radius2(radius*radius),
-            color(color), brdf(brdf), emitColor(emitColor)
+            brdf(brdf), edf(edf)
         {}
 
         Hit intersect(const Ray &r) const override;
         Ray generateLightRay(const Vec3f &org) const override;
         PathVertex pointOnSurface() const override;
-        Vec3f emission() const override
-        {
-            return emitColor;
-        }
+        const EDF *getEDF() const override { return edf; }
         const BRDF *getBRDF() const override { return brdf; }
 
     };
@@ -51,22 +48,22 @@ namespace Orca
     {
     private:
         Vec3f center, normal;
-        Vec3f color;
         const BRDF *brdf;
+        const EDF *edf;
 
     public:
-        Plane(Vec3f const &center, Vec3f const &normal, Vec3f const &color, const BRDF *brdf) :
-            center(center), normal(normal), color(color), brdf(brdf)
+        Plane(Vec3f const &center, Vec3f const &normal, const BRDF *brdf, const EDF *edf) :
+            center(center), normal(normal), brdf(brdf), edf(edf)
         {}
 
         // A plane is not going to be used as an infinite-area light
         PathVertex pointOnSurface() const override
         {
-            return PathVertex(Vec3f(0), Vec3f(0), Vec3f(0), Vec3f(0), 0, 0);
+            return PathVertex(Vec3f(0), Vec3f(0), Vec3f(0), Vec3f(0), 0, 0, 0);
         }
 
         Hit intersect(const Ray &r) const override;
         const BRDF *getBRDF() const override { return brdf; }
-
+        const EDF *getEDF() const override { return edf; }
     };
 }

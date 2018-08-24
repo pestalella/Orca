@@ -6,6 +6,6 @@ namespace Orca
     {
     public:
         static void initialize();
-        static void saveRGBImage(const char *imgBuf, int w, int h, char const *filename);
+        static void saveRGBImage(const unsigned char *imgBuf, int w, int h, char const *filename);
     };
 }

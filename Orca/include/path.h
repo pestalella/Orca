@@ -4,6 +4,9 @@
 
 #include <vector>
 
+class BRDF;
+class EDF;
+
 namespace Orca {
     class PathVertex
     {
@@ -12,12 +15,13 @@ namespace Orca {
         Vec3f normal;
         Vec3f inDir;
         Vec3f outDir;
-        float probability;
+        Vec3f probability;
         BRDF const *brdf;
+        EDF const *edf;
 
     public:
         PathVertex(Vec3f const &pos, Vec3f const &normal, const Vec3f &inDir, 
-            const Vec3f & outDir, float probability, BRDF const *brdf);
+            const Vec3f & outDir, Vec3f const &probability, BRDF const *brdf, EDF const *edf);
         ~PathVertex();
     };
 
@@ -25,7 +29,6 @@ namespace Orca {
     {
     public:
         std::vector<PathVertex> vertices;
-        Vec3f originalLightIntensity;
     public:
         Path();
         ~Path();

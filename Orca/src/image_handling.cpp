@@ -17,12 +17,12 @@ void Orca::ImageHandling::initialize()
     iluInit();
 }
 
-void Orca::ImageHandling::saveRGBImage(const char *imgBuf, int w, int h, char const *filename) {
+void Orca::ImageHandling::saveRGBImage(const unsigned char *imgBuf, int w, int h, char const *filename) {
     ILuint ImageName;
     ilGenImages(1, &ImageName);
     //        Now bind this image name so that DevIL performs all subsequent operations on this image:
     ilBindImage(ImageName);
-    ILboolean result = ilTexImage(w, h, 1, 3, IL_RGB, IL_UNSIGNED_BYTE, const_cast<char *>(imgBuf));
+    ILboolean result = ilTexImage(w, h, 1, 3, IL_RGB, IL_UNSIGNED_BYTE, const_cast<unsigned char *>(imgBuf));
     if (result) {
         ilEnable(IL_FILE_OVERWRITE);
         result = ilSave(IL_PNG, filename);

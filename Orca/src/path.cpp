@@ -3,28 +3,30 @@
 #include "BRDF.h"
 #include "path.h"
 
+namespace Orca {
+    Path::Path()
+    {
+    }
 
-Orca::Path::Path()
-{
-}
+    Path::~Path()
+    {
+    }
 
-Orca::Path::~Path()
-{
-}
+    void Path::appendVertex(const PathVertex &v)
+    {
+        vertices.push_back(v);
+    }
 
-void Orca::Path::appendVertex(const PathVertex &v)
-{
-    vertices.push_back(v);
-}
+    PathVertex::PathVertex(Vec3f const &pos, Vec3f const &normal, const Vec3f &inDir,
+        const Vec3f & outDir, Vec3f const &probability, BRDF const *brdf, EDF const *edf) :
+        pos(pos), normal(normal), inDir(inDir), outDir(outDir),
+        probability(probability), brdf(brdf), edf(edf)
+    {
 
-Orca::PathVertex::PathVertex(Vec3f const &pos, Vec3f const &normal, const Vec3f &inDir,
-    const Vec3f & outDir, float probability, BRDF const *brdf) :
-    pos(pos), normal(normal), inDir(inDir), outDir(outDir), probability(probability), brdf(brdf)
-{
+    }
 
-}
+    PathVertex::~PathVertex()
+    {
 
-Orca::PathVertex::~PathVertex()
-{
-
+    }
 }
