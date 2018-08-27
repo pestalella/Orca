@@ -13,7 +13,7 @@ namespace Orca {
     Vec3f DiffuseBRDF::probability(Vec3f const & normal, Vec3f const & inDir, Vec3f const & outDir) const
     {
         // isotropic, therefore only depends on the cosine of the input dir wrt the normal
-        return color*std::max(0.0f,-(normal.dotProduct(inDir)));
+        return color;//*std::max(0.0f, -(normal.dotProduct(inDir)));
     }
 
     BRDFSample DiffuseBRDF::generateOutSample(Vec3f const & normal, Vec3f const &inDir) const

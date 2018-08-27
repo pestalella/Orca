@@ -16,12 +16,14 @@ namespace Orca
         std::vector<IntersectableObject *> lights;
         BRDF *cameraBRDF;
         EDF *cameraEDF;
+        StatisticsCollector *sc;
 
     private:
         Path buildPath(PathVertex const &startNode, int maxNodes);
 
     public:
-        Scene();
+        Scene(StatisticsCollector *sc);
+        Vec3f computeEnvLight(Vec3f const & pos, Vec3f const & normal);
         Hit intersectClosest(const Ray &r);
         Hit intersectAny(const Ray &r);
 

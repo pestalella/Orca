@@ -2,6 +2,7 @@
 #include "CppUnitTest.h"
 
 #include "BRDF.h"
+#include "statistics_collector.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using Orca::Vec3f;
@@ -57,4 +58,33 @@ namespace OrcaTests
             Assert::IsTrue(std::abs(outDir.dir.norm() - 1.0f) < 1E-4f);
         }
 	};
+
+    TEST_CLASS(TestStatsCollector)
+    {
+    public:
+        TEST_METHOD(TestAccumEvent)
+        {
+            StatisticsCollector sc;
+
+            sc.accumEvent("EventA");
+            Assert::AreEqual(1ULL, sc.eventCount("EventA"));
+        }
+        TEST_METHOD(TestAccumEventMulti)
+        {
+            StatisticsCollector sc;
+
+            sc.accumEvent("EventA");
+            sc.accumEvent("EventB");
+            sc.accumEvent("EventA");
+            Assert::AreEqual(2ULL, sc.eventCount("EventA"));
+            Assert::AreEqual(1ULL, sc.eventCount("EventB"));
+        }
+        TEST_METHOD(TestAccumEventNonExisting)
+        {
+            StatisticsCollector sc;
+
+            sc.accumEvent("EventA");
+            Assert::AreEqual(0ULL, sc.eventCount("EventB"));
+        }
+    };
 }

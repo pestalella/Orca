@@ -1,6 +1,8 @@
 #include "stdafx.h"
+
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include <algorithm>
 
 #include "geometry.h"
 #include "random.h"
@@ -28,6 +30,8 @@ namespace Orca {
 
     Hit Plane::intersect(const Ray & r) const
     {
+        stats->accumEvent("Plane::intersect");
+
         float denom = normal.dotProduct(r.dirNorm);
         if (std::abs(denom) > 1E-6f) // your favorite epsilon
         {
@@ -42,6 +46,8 @@ namespace Orca {
 
     Hit Ball::intersect(const Ray & r) const
     {
+        stats->accumEvent("Ball::intersect");
+
         float t0, t1; // solutions for t if the ray intersects 
         // analytic solution
         Vec3f L = r.origin - center;
@@ -63,6 +69,8 @@ namespace Orca {
 
     Ray Ball::generateLightRay(const Vec3f &org) const
     {
+        stats->accumEvent("Plane::generateLightRay");
+
         float rho = sqrt(Random::uniform01());
         rho *= radius;
         float theta = Random::uniform01()*(float)M_2_PI;
@@ -85,6 +93,8 @@ namespace Orca {
 
     PathVertex Ball::pointOnSurface() const
     {
+        stats->accumEvent("Ball::pointOnSurface");
+
         float x1, x2;
         do {
             x1 = Random::uniform(-1, 1);
@@ -102,5 +112,18 @@ namespace Orca {
 
         // TODO: Review the outDir (make it cos-weighted diffuse?)
         return PathVertex(center+pos*radius, normal, -normal, normal, 1.0f, brdf, edf);
+    }
+
+    Vec3f cosineSampleHemisphere()
+    {
+        float u1 = Random::uniform01();
+        float u2 = Random::uniform01();
+        float r = sqrt(u1);
+        float theta = 2 * M_PI * u2;
+
+        float x = r * cos(theta);
+        float y = r * sin(theta);
+        
+        return Vec3f(x, y, sqrt(std::max(0.0f, 1 - u1)));
     }
 }

@@ -8,13 +8,17 @@
 
 namespace Orca {
 
-    PathVertex missShader(Vec3f const &dir)
-    {
-        static BRDF *skyBRDF = new DiffuseBRDF(1);
-        static EDF *skyEDF = new IsotropicEDF(Vec3f(5300, 8000, 9200));
+    //PathVertex missShader(Vec3f const &dir)
+    //{
+    //    static BRDF *skyBRDF = new DiffuseBRDF(1);
+    //    static EDF *skyEDF = new IsotropicEDF(Vec3f(5300, 8000, 9200));
 
-        return PathVertex(Vec3f(1E6f, 1E6f, 1E6f), -dir, dir, dir, 
-            Vec3f(1), skyBRDF, skyEDF);
+    //    return PathVertex(Vec3f(1E6f, 1E6f, 1E6f), -dir, dir, dir,
+    //        Vec3f(1), skyBRDF, skyEDF);
+    //}
+    Vec3f missShader(Vec3f const &dir)
+    {
+        return Vec3f(5300, 8000, 9200);
     }
 
     Hit Scene::intersectClosest(const Ray & r)
@@ -42,30 +46,51 @@ namespace Orca {
         return Hit();
     }
 
-    Scene::Scene()
+    Scene::Scene(StatisticsCollector *sc) :
+        sc(sc)
     {
         EDF *noEmission = new IsotropicEDF(0);
         BRDF *specular = new SpecularBRDF();
         cameraBRDF = new DiffuseBRDF(Vec3f(1));
         cameraEDF = new IsotropicEDF(Vec3f(0));  // The camera emits no light
-        objects.push_back(new Ball(Vec3f(0, 0, 1.5f), 0.7f, specular, noEmission));
+        objects.push_back(new Ball(Vec3f(0, 0, 1.5f), 0.7f, specular, noEmission, sc));
 
-        objects.push_back(new Ball(Vec3f(-1, -1, 2.5f), 0.5, new DiffuseBRDF(Vec3f(0.2f, 0.2f, 0.2f)), noEmission));
-        objects.push_back(new Ball(Vec3f( 1, -1, 2.5f), 0.5, new DiffuseBRDF(Vec3f(0, 0, 1)), noEmission));
-        objects.push_back(new Ball(Vec3f(-1,  1, 2.5f), 0.5, new DiffuseBRDF(Vec3f(1, 1, 0)), noEmission));
-        objects.push_back(new Ball(Vec3f( 1,  1, 2.5f), 0.5, new DiffuseBRDF(Vec3f(0, 1, 1)), noEmission));
+        objects.push_back(new Ball(Vec3f(-1, -1, 2.5f), 0.5, new DiffuseBRDF(Vec3f(0.2f, 0.2f, 0.2f)), noEmission, sc));
+        objects.push_back(new Ball(Vec3f( 1, -1, 2.5f), 0.5, new DiffuseBRDF(Vec3f(0, 0, 1)), noEmission, sc));
+        objects.push_back(new Ball(Vec3f(-1,  1, 2.5f), 0.5, new DiffuseBRDF(Vec3f(1, 1, 0)), noEmission, sc));
+        objects.push_back(new Ball(Vec3f( 1,  1, 2.5f), 0.5, new DiffuseBRDF(Vec3f(0, 1, 1)), noEmission, sc));
 
-        objects.push_back(new Ball(Vec3f(-1, -1, 0.5f), 0.5, new DiffuseBRDF(Vec3f(1, 0, 0)), noEmission));
-        objects.push_back(new Ball(Vec3f( 1, -1, 0.5f), 0.5, new DiffuseBRDF(Vec3f(1, 0, 1)), noEmission));
-        objects.push_back(new Ball(Vec3f(-1,  1, 0.5f), 0.5, new DiffuseBRDF(Vec3f(1, 1, 0)), noEmission));
-        objects.push_back(new Ball(Vec3f( 1,  1, 0.5f), 0.5, new DiffuseBRDF(Vec3f(1, 1, 1)), noEmission));
+        objects.push_back(new Ball(Vec3f(-1, -1, 0.5f), 0.5, new DiffuseBRDF(Vec3f(1, 0, 0)), noEmission, sc));
+        objects.push_back(new Ball(Vec3f( 1, -1, 0.5f), 0.5, new DiffuseBRDF(Vec3f(1, 0, 1)), noEmission, sc));
+        objects.push_back(new Ball(Vec3f(-1,  1, 0.5f), 0.5, new DiffuseBRDF(Vec3f(1, 1, 0)), noEmission, sc));
+        objects.push_back(new Ball(Vec3f( 1,  1, 0.5f), 0.5, new DiffuseBRDF(Vec3f(1, 1, 1)), noEmission, sc));
 
         // Floor
-        objects.push_back(new Plane(Vec3f(0, 0, 0), Vec3f(0, 0, 1), new DiffuseBRDF(Vec3f(0.7f, 0.7f, 0.7f)), noEmission));
+        objects.push_back(new Plane(Vec3f(0, 0, 0), Vec3f(0, 0, 1), new DiffuseBRDF(Vec3f(0.7f, 0.7f, 0.7f)), noEmission, sc));
 
-        Ball *lightBulb = new Ball(Vec3f(5, -5, 5), 1.0, new DiffuseBRDF(Vec3f(1, 1, 1)), new IsotropicEDF(Vec3f(100000, 100000, 90000)));
+        Ball *lightBulb = new Ball(Vec3f(5, -5, 5), 1.0, new DiffuseBRDF(Vec3f(1, 1, 1)), new IsotropicEDF(Vec3f(100000, 100000, 90000)), sc);
+//        Ball *lightBulb = new Ball(Vec3f(5, -5, 5), 1.0, new DiffuseBRDF(Vec3f(1, 1, 1)), new IsotropicEDF(Vec3f(0, 0, 0)), sc);
         lights.push_back(lightBulb);
         objects.push_back(lightBulb);
+    }
+
+    Vec3f Scene::computeEnvLight(Vec3f const &pos, Vec3f const &normal)
+    {
+        Matrix44f orientation = orientationMatrix(normal);
+
+        const int numEnvSamples = 10;
+        Vec3f envLight = 0;
+        for (int s = 0; s < numEnvSamples; ++s)
+        {
+            Vec3f rawDir = cosineSampleHemisphere();
+            Vec3f rayDir;
+            orientation.multDirMatrix(rawDir, rayDir);
+            Hit hInfo = intersectAny(Ray(pos, rayDir));
+            if (hInfo.miss) {
+                envLight = (s*envLight + missShader(rayDir))*(1.0f/(s+1));
+            }
+        }
+        return envLight;
     }
 
     Path Scene::buildPath(PathVertex const &startNode, int maxVertices)
@@ -79,7 +104,7 @@ namespace Orca {
             Hit hInfo = intersectClosest(Ray(curNode.pos + 1E-4f*curNode.normal, curNode.outDir));
             if (hInfo.miss) {
                 // Missed the scene. Stop trying to find new nodes.
-                randomPath.appendVertex(missShader(curNode.outDir));
+//                randomPath.appendVertex(missShader(curNode.outDir));
                 break;
             }
             BRDFSample outSample = hInfo.brdf->generateOutSample(hInfo.normal, curNode.outDir);
@@ -103,7 +128,11 @@ namespace Orca {
     Path Scene::buildCameraPath(Ray const &camRay, int maxVertices)
     {
         PathVertex cameraNode(camRay.origin, camRay.dirNorm, camRay.dirNorm, camRay.dirNorm, 1.0, cameraBRDF, cameraEDF);
-        return buildPath(cameraNode, maxVertices);
+        Path pathWithoutEnv = buildPath(cameraNode, maxVertices);
+        return pathWithoutEnv;
+        //PathVertex const &lastVert = pathWithoutEnv.vertices.back;
+        //PathVertex envVertex(lastVert.outDir*1E5, -lastVert.outDir, lastVert.outDir, -lastVert.outDir)
+        //pathWithoutEnv.appendVertex
     }
 
     Vec3f Scene::traceRayBidirectional(Ray const &r, int maxVertices)
@@ -116,6 +145,15 @@ namespace Orca {
         int numSamples = 0;
         bool firstCamVert = true;
         for (auto &camVert : viewPath.vertices) {
+            if (firstCamVert) {
+                firstCamVert = false;
+                if (viewPath.vertices.size() == 1)
+                {
+                    accumSamples = missShader(camVert.outDir);
+                    numSamples++;
+                }
+                continue;
+            }
             Vec3f accumLightProbability = 1.0;
             accumCamProbability *= camVert.probability;
             bool firstLightVert = true;
@@ -127,17 +165,20 @@ namespace Orca {
                     cam2light *= 1.0f/sqrt(cam2lightNorm);
 
                     // Add local emission from the camera path vertex
-                    Vec3f camEmitProb = accumCamProbability * camVert.edf->emission(camVert.normal, camVert.outDir);
-                    accumSamples += camEmitProb;
+                    Vec3f curSample = camVert.edf->emission(camVert.normal, camVert.outDir);
+
+                    // Add light coming from the environment far away
+                    curSample += computeEnvLight(camVert.pos + 1E-4f*camVert.normal, camVert.normal);
 
                     Hit hInfo = intersectClosest(Ray(camVert.pos + 1E-4f*camVert.normal, cam2light));
-                    if (hInfo.t*hInfo.t >= cam2lightNorm) {
+                    if (hInfo.t*hInfo.t > cam2lightNorm) {
                         Vec3f probCam = camVert.brdf->probability(camVert.normal, camVert.inDir, cam2light);
                         Vec3f probLight = lightVert.brdf->probability(lightVert.normal, lightVert.inDir, -cam2light);
                         Vec3f joiningPathProb = probLight*probCam;
                         Vec3f lightEmitProb = accumLightProbability * lightVert.edf->emission(lightVert.normal, lightVert.outDir);
-                        accumSamples += joiningPathProb*lightEmitProb;
+                        curSample += joiningPathProb*lightEmitProb;
                     }
+                    accumSamples += accumCamProbability*curSample;
                     numSamples++;
                 }
                 firstLightVert = false;

@@ -20,7 +20,6 @@ void Orca::ImageHandling::initialize()
 void Orca::ImageHandling::saveRGBImage(const unsigned char *imgBuf, int w, int h, char const *filename) {
     ILuint ImageName;
     ilGenImages(1, &ImageName);
-    //        Now bind this image name so that DevIL performs all subsequent operations on this image:
     ilBindImage(ImageName);
     ILboolean result = ilTexImage(w, h, 1, 3, IL_RGB, IL_UNSIGNED_BYTE, const_cast<unsigned char *>(imgBuf));
     if (result) {
@@ -29,7 +28,25 @@ void Orca::ImageHandling::saveRGBImage(const unsigned char *imgBuf, int w, int h
         if (!result) {
             std::cout << "ilSave returned false. Something went wrong." << std::endl;
         }
-    } else {
+    }
+    else {
+        std::cout << "ilTexImage returned false. Something went wrong." << std::endl;
+    }
+}
+
+void Orca::ImageHandling::saveLImage(const unsigned char *imgBuf, int w, int h, char const *filename) {
+    ILuint ImageName;
+    ilGenImages(1, &ImageName);
+    ilBindImage(ImageName);
+    ILboolean result = ilTexImage(w, h, 1, 1, IL_LUMINANCE, IL_UNSIGNED_BYTE, const_cast<unsigned char *>(imgBuf));
+    if (result) {
+        ilEnable(IL_FILE_OVERWRITE);
+        result = ilSave(IL_PNG, filename);
+        if (!result) {
+            std::cout << "ilSave returned false. Something went wrong." << std::endl;
+        }
+    }
+    else {
         std::cout << "ilTexImage returned false. Something went wrong." << std::endl;
     }
 }

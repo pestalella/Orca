@@ -3,6 +3,7 @@
 #include "intersection.h"
 #include "path.h"
 #include "ray.h"
+#include "statistics_collector.h"
 
 #include <vector>
 
@@ -29,11 +30,12 @@ namespace Orca
         float radius2;
         const BRDF *brdf;
         const EDF *edf;
+        StatisticsCollector *stats;
 
     public:
-        Ball(Vec3f const &org, float radius, const BRDF *brdf, const EDF *edf) :
+        Ball(Vec3f const &org, float radius, const BRDF *brdf, const EDF *edf, StatisticsCollector *stats) :
             center(org), radius(radius), radius2(radius*radius),
-            brdf(brdf), edf(edf)
+            brdf(brdf), edf(edf), stats(stats)
         {}
 
         Hit intersect(const Ray &r) const override;
@@ -50,15 +52,17 @@ namespace Orca
         Vec3f center, normal;
         const BRDF *brdf;
         const EDF *edf;
+        StatisticsCollector *stats;
 
     public:
-        Plane(Vec3f const &center, Vec3f const &normal, const BRDF *brdf, const EDF *edf) :
-            center(center), normal(normal), brdf(brdf), edf(edf)
+        Plane(Vec3f const &center, Vec3f const &normal, const BRDF *brdf, const EDF *edf, StatisticsCollector *stats) :
+            center(center), normal(normal), brdf(brdf), edf(edf), stats(stats)
         {}
 
         // A plane is not going to be used as an infinite-area light
         PathVertex pointOnSurface() const override
         {
+            stats->accumEvent("Plane::PointOnSurface");
             return PathVertex(Vec3f(0), Vec3f(0), Vec3f(0), Vec3f(0), 0, 0, 0);
         }
 
@@ -66,4 +70,5 @@ namespace Orca
         const BRDF *getBRDF() const override { return brdf; }
         const EDF *getEDF() const override { return edf; }
     };
+    Vec3f cosineSampleHemisphere();
 }
