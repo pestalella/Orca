@@ -70,5 +70,27 @@ namespace Orca
         const BRDF *getBRDF() const override { return brdf; }
         const EDF *getEDF() const override { return edf; }
     };
+
+    class Triangle : public IntersectableObject
+    {
+    private: 
+        Vec3f v0, v1, v2;
+        Vec3f edge1, edge2;
+        Vec3f normal;
+        const BRDF *brdf;
+        const EDF *edf;
+        StatisticsCollector *stats;
+
+    public:
+        Triangle(Vec3f const &v0, Vec3f const &v1, Vec3f const &v2, 
+                 const BRDF *brdf, const EDF *edf, StatisticsCollector *stats);
+
+        PathVertex pointOnSurface() const override;
+        Hit intersect(const Ray &r) const override;
+        const BRDF *getBRDF() const override { return brdf; }
+        const EDF *getEDF() const override { return edf; }
+    };
+
     Vec3f cosineSampleHemisphere();
 }
+

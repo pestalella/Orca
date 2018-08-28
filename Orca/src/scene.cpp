@@ -18,7 +18,8 @@ namespace Orca {
     //}
     Vec3f missShader(Vec3f const &dir)
     {
-        return Vec3f(5300, 8000, 9200);
+//        return Vec3f(5300, 8000, 9200);
+        return Vec3f(0, 0, 0);
     }
 
     Hit Scene::intersectClosest(const Ray & r)
@@ -64,14 +65,44 @@ namespace Orca {
         objects.push_back(new Ball(Vec3f( 1, -1, 0.5f), 0.5, new DiffuseBRDF(Vec3f(1, 0, 1)), noEmission, sc));
         objects.push_back(new Ball(Vec3f(-1,  1, 0.5f), 0.5, new DiffuseBRDF(Vec3f(1, 1, 0)), noEmission, sc));
         objects.push_back(new Ball(Vec3f( 1,  1, 0.5f), 0.5, new DiffuseBRDF(Vec3f(1, 1, 1)), noEmission, sc));
+      
+        Vec3f boxVerts[] = { {-1,-3,0}, {3,-3,0}, {3,3,0}, {-3,3,0},
+                             {-3,-3,6}, {3,-3,6}, {3,3,6}, {-3,3,6} };
 
+        // Cornell box walls
         // Floor
-        objects.push_back(new Plane(Vec3f(0, 0, 0), Vec3f(0, 0, 1), new DiffuseBRDF(Vec3f(0.7f, 0.7f, 0.7f)), noEmission, sc));
+        objects.push_back(new Triangle(boxVerts[0], boxVerts[1], boxVerts[3], new DiffuseBRDF(Vec3f(0.5, 0.5, 0.5)), noEmission, sc));
+        objects.push_back(new Triangle(boxVerts[1], boxVerts[2], boxVerts[3], new DiffuseBRDF(Vec3f(0.5, 0.5, 0.5)), noEmission, sc));
+        // Right wall
+        objects.push_back(new Triangle(boxVerts[1], boxVerts[5], boxVerts[6], new DiffuseBRDF(Vec3f(0.1, 1.0, 0.1)), noEmission, sc));
+        objects.push_back(new Triangle(boxVerts[1], boxVerts[6], boxVerts[2], new DiffuseBRDF(Vec3f(0.1, 1.0, 0.1)), noEmission, sc));
+        // Left wall
+        objects.push_back(new Triangle(boxVerts[0], boxVerts[3], boxVerts[7], new DiffuseBRDF(Vec3f(1.0, 0.1, 0.1)), noEmission, sc));
+        objects.push_back(new Triangle(boxVerts[0], boxVerts[7], boxVerts[4], new DiffuseBRDF(Vec3f(1.0, 0.1, 0.1)), noEmission, sc));
+        // Back
+        objects.push_back(new Triangle(boxVerts[2], boxVerts[6], boxVerts[7], new DiffuseBRDF(Vec3f(0.5, 0.5, 0.5)), noEmission, sc));
+        objects.push_back(new Triangle(boxVerts[2], boxVerts[7], boxVerts[3], new DiffuseBRDF(Vec3f(0.5, 0.5, 0.5)), noEmission, sc));
+        // Ceiling
+        objects.push_back(new Triangle(boxVerts[5], boxVerts[7], boxVerts[6], new DiffuseBRDF(Vec3f(0.5, 0.5, 0.5)), noEmission, sc));
+        objects.push_back(new Triangle(boxVerts[5], boxVerts[4], boxVerts[7], new DiffuseBRDF(Vec3f(0.5, 0.5, 0.5)), noEmission, sc));
 
-        Ball *lightBulb = new Ball(Vec3f(5, -5, 5), 1.0, new DiffuseBRDF(Vec3f(1, 1, 1)), new IsotropicEDF(Vec3f(100000, 100000, 90000)), sc);
-//        Ball *lightBulb = new Ball(Vec3f(5, -5, 5), 1.0, new DiffuseBRDF(Vec3f(1, 1, 1)), new IsotropicEDF(Vec3f(0, 0, 0)), sc);
-        lights.push_back(lightBulb);
-        objects.push_back(lightBulb);
+        // Ceiling light
+        Vec3f lv[] = { {1, -1, 5.95}, { 3, -1, 5.95 }, { 3, 1, 5.95 }, { 1, 1, 5.95 } };
+        Triangle *ceil1 = new Triangle(lv[1], lv[3], lv[2], new DiffuseBRDF(Vec3f(1, 1, 1)), new IsotropicEDF(Vec3f(100000, 100000, 90000)), sc);
+        Triangle *ceil2 = new Triangle(lv[1], lv[0], lv[3], new DiffuseBRDF(Vec3f(1, 1, 1)), new IsotropicEDF(Vec3f(100000, 100000, 90000)), sc);
+        lights.push_back(ceil1);
+        lights.push_back(ceil2);
+        objects.push_back(ceil1);
+        objects.push_back(ceil2);
+
+
+        //// Floor
+//        objects.push_back(new Plane(Vec3f(0, 0, 0), Vec3f(0, 0, 1), new DiffuseBRDF(Vec3f(0.7f, 0.7f, 0.7f)), noEmission, sc));
+
+//        Ball *lightBulb = new Ball(Vec3f(5, -5, 5), 1.0, new DiffuseBRDF(Vec3f(1, 1, 1)), new IsotropicEDF(Vec3f(100000, 100000, 90000)), sc);
+////        Ball *lightBulb = new Ball(Vec3f(5, -5, 5), 1.0, new DiffuseBRDF(Vec3f(1, 1, 1)), new IsotropicEDF(Vec3f(0, 0, 0)), sc);
+//        lights.push_back(lightBulb);
+//        objects.push_back(lightBulb);
     }
 
     Vec3f Scene::computeEnvLight(Vec3f const &pos, Vec3f const &normal)
@@ -120,7 +151,7 @@ namespace Orca {
         int selectedLight = Random::uniformInt(0, (int)lights.size()-1);
         IntersectableObject *light = lights[selectedLight];
         auto firstVertex = light->pointOnSurface();
-        firstVertex.pos += firstVertex.normal*1E-4;
+        firstVertex.pos += firstVertex.normal*1E-4f;
         Path lightPath = buildPath(firstVertex, maxVertices);
         return lightPath;
     }

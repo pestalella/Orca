@@ -119,11 +119,69 @@ namespace Orca {
         float u1 = Random::uniform01();
         float u2 = Random::uniform01();
         float r = sqrt(u1);
-        float theta = 2 * M_PI * u2;
+        float theta = (float)(2 * M_PI * u2);
 
         float x = r * cos(theta);
         float y = r * sin(theta);
         
         return Vec3f(x, y, sqrt(std::max(0.0f, 1 - u1)));
+    }
+
+    Triangle::Triangle(Vec3f const &v0, Vec3f const &v1, Vec3f const &v2, 
+        const BRDF * brdf, const EDF * edf, StatisticsCollector * stats) :
+        v0(v0), v1(v1), v2(v2), brdf(brdf), edf(edf), stats(stats),
+        edge1(v1-v0), edge2(v2-v0)
+    {
+        normal = edge1.crossProduct(edge2).normalized();
+    }
+
+    PathVertex Triangle::pointOnSurface() const
+    {
+        float u1 = Random::uniform01();
+        float u2 = Random::uniform01();
+        if (u1+u2 > 1.0f) {
+            u1 = 1-u1;
+            u2 = 1-u2;
+        }
+        return PathVertex(v0 + u1*edge1 + u2*edge2, normal, -normal, normal, 1.0, brdf, edf);
+    }
+    
+    //
+    // This code (licensed WP:CC BY-SA) is adapted from 
+    // https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
+    //
+    Hit Triangle::intersect(const Ray & r) const
+    {
+        const float EPSILON = 0.0000001;
+        Vec3f pVec = r.dirNorm.crossProduct(edge2);
+        float det = edge1.dotProduct(pVec);
+        if (det > -EPSILON && det < EPSILON)
+            return Hit();
+
+        float invDet = 1/det;
+        Vec3f tVec = r.origin - v0;
+        float u = invDet * (tVec.dotProduct(pVec));
+        if (u < 0.0 || u > 1.0)
+            return Hit();
+
+        Vec3f qVec = tVec.crossProduct(edge1);
+        float v = invDet * r.dirNorm.dotProduct(qVec);
+        if (v < 0.0 || u + v > 1.0)
+            return Hit();
+
+        // At this stage we can compute t to find out where the intersection point is on the line.
+        float t = invDet * edge2.dotProduct(qVec);
+        if (t > EPSILON) // ray intersection
+        {
+            // Make sure the triangle behaves like a two sided object
+            if (normal.dotProduct(r.dirNorm) < 0)
+                return Hit(r.origin + r.dirNorm * t, normal, t, this, brdf, edf);
+            else
+                return Hit(r.origin + r.dirNorm * t, -normal, t, this, brdf, edf);
+        }
+        else // This means that there is a line intersection but not a ray intersection.
+        {
+            return Hit();
+        }
     }
 }
